@@ -122,3 +122,17 @@
 
 **Why:** Implementing a full auth layer would add significant boilerplate and distract from the core exercise (cart, checkout, discounts, and reporting). For a self-contained coding assignment that runs locally, it is acceptable to keep these routes open while clearly documenting that in a real system they would be protected behind proper auth and role checks.
 
+---
+
+## Decision: Clear cart after successful checkout
+
+**Context:** After a customer checks out, I needed to decide whether the cart should remain with its items or be cleared.
+
+**Options Considered:**
+- Option A: Keep the cart and leave items in it after checkout
+- Option B: Clear the cart once an order is successfully created
+
+**Choice:** Clear the cart after successful checkout.
+
+**Why:** Clearing the cart matches common e-commerce behavior and avoids accidental double-purchase if `/checkout` is called again with the same `cartId`. It also simplifies reasoning about state: a cart is either active (not yet checked out) or removed, while orders become the source of truth for completed purchases.
+

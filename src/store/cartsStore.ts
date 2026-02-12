@@ -43,6 +43,10 @@ export function upsertCart(cartId: string | undefined, itemsToAdd: CartItem[]): 
   return updated;
 }
 
+export function clearCart(cartId: string): void {
+  carts.delete(cartId);
+}
+
 function normalizeItems(items: CartItem[]): CartItem[] {
   return mergeItems([], items);
 }

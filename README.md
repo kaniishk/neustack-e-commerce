@@ -7,8 +7,10 @@ At this stage, the project includes:
 - An in-memory product catalog with a few seeded products.
 - A `/products` endpoint to list the available products.
 - An in-memory cart store keyed by `cartId`, with simple cart APIs.
+- A `/checkout` endpoint to turn a cart into an order, optionally applying a discount code.
+- Admin endpoints for generating discount codes and viewing aggregate stats.
 
-Further phases will add carts, checkout, discounts, admin endpoints, and tests.
+Future improvements could include persistence, authentication, and a frontend.
 
 ---
 
@@ -62,6 +64,60 @@ Cart operations:
 - `POST http://localhost:3000/cart`
   - Body: `{ "cartId": "<cartId>", "items": [{ "productId": "p2", "quantity": 1 }] }` (adds/merges items)
 - `GET http://localhost:3000/cart/<cartId>` – fetch current cart contents
+
+Checkout:
+
+- `POST http://localhost:3000/checkout`
+  - Body:
+    ```json
+    {
+      "cartId": "<cartId>",
+      "discountCode": "OPTIONAL_CODE"
+    }
+    ```
+  - On success (`201`), returns an order summary:
+    ```json
+    {
+      "orderId": "<id>",
+      "items": [
+        { "productId": "p1", "quantity": 2, "unitPriceCents": 1999 }
+      ],
+      "subtotalCents": 3998,
+      "discountCode": "OPTIONAL_CODE",
+      "discountPercent": 10,
+      "discountAmountCents": 400,
+      "totalCents": 3598,
+      "createdAt": "2025-01-01T00:00:00.000Z"
+    }
+    ```
+  - Error responses:
+    - `400` if the cart is empty, the payload is invalid, or the discount code is invalid/used.
+    - `404` if the cart does not exist.
+
+Admin endpoints (unauthenticated for this exercise, see `DECISIONS.md`):
+
+- `POST http://localhost:3000/admin/discounts/generate`
+  - Attempts to generate a new discount code if the nth-order condition is satisfied.
+  - On success (`201`), returns:
+    ```json
+    { "code": "<uuid>", "percent": 10, "createdAt": "..." }
+    ```
+  - On failure (`400`), returns:
+    ```json
+    { "error": "Not eligible to generate discount code yet" }
+    ```
+
+- `GET http://localhost:3000/admin/stats`
+  - Returns aggregate stats derived from in-memory orders and discount codes:
+    ```json
+    {
+      "itemsPurchased": 0,
+      "revenueCents": 0,
+      "discountCodesIssued": 0,
+      "discountCodesUsed": 0,
+      "totalDiscountsGivenCents": 0
+    }
+    ```
 
 ### Build and run compiled code
 
