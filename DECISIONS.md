@@ -94,3 +94,31 @@
 
 **Why:** A global counter with `floor(totalOrdersCompleted / n)` allowed codes is simple to reason about and aligns directly with the problem statement. Using percentage discounts keeps the logic flexible across different basket sizes, and enforcing one-time usage per code prevents abuse while remaining easy to track in-memory via a `used` flag and `usedByOrderId` reference.
 
+---
+
+## Decision: Centralized discount configuration
+
+**Context:** The discount behavior (every nth order, x% off) needs to be easy to find and adjust without editing multiple files.
+
+**Options Considered:**
+- Option A: Hardcode `n` and `xPercent` directly wherever discounts are used
+- Option B: Keep a single `discountConfig` object and import it where needed
+
+**Choice:** Centralize discount configuration in a single `discountConfig` module.
+
+**Why:** One source of truth for discount parameters avoids subtle bugs where different parts of the code use different values. It also allows quick experimentation with discount rules and makes it obvious where to look when changing business behavior.
+
+---
+
+## Decision: Unauthenticated admin APIs for the exercise
+
+**Context:** The admin APIs (`/admin/discounts/generate`, `/admin/stats`) would normally require authentication and authorization, but the assignment does not specify auth requirements.
+
+**Options Considered:**
+- Option A: Implement API key or basic auth middleware for `/admin/*`
+- Option B: Leave admin endpoints unauthenticated and document that this is for local/demo use only
+
+**Choice:** Leave admin endpoints unauthenticated for now.
+
+**Why:** Implementing a full auth layer would add significant boilerplate and distract from the core exercise (cart, checkout, discounts, and reporting). For a self-contained coding assignment that runs locally, it is acceptable to keep these routes open while clearly documenting that in a real system they would be protected behind proper auth and role checks.
+
