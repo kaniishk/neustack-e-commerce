@@ -66,3 +66,17 @@
 
 **Why:** This works smoothly with Jest and the existing Node toolchain, and allows idiomatic default imports for Express. It avoids the additional configuration overhead of full ESM for this small project.
 
+---
+
+## Decision: Anonymous carts identified by cartId
+
+**Context:** I needed a way for clients to add items to a cart and later check out without implementing a full user/auth system.
+
+**Options Considered:**
+- Option A: Anonymous carts identified by a server-generated `cartId` returned from the API
+- Option B: User-based carts tied to a `userId` (e.g. via auth or explicit user identifier)
+
+**Choice:** Anonymous carts identified by a server-generated `cartId`.
+
+**Why:** This keeps the API simple and easy to exercise from tools like Postman: the client only needs to remember the `cartId`. It avoids building authentication and user management, which are out of scope for this exercise, while still reflecting a realistic pattern (cart-as-session) that can later be mapped to authenticated users if needed.
+

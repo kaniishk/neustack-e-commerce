@@ -6,6 +6,7 @@ At this stage, the project includes:
 - A basic Express server with a `/health` endpoint.
 - An in-memory product catalog with a few seeded products.
 - A `/products` endpoint to list the available products.
+- An in-memory cart store keyed by `cartId`, with simple cart APIs.
 
 Further phases will add carts, checkout, discounts, admin endpoints, and tests.
 
@@ -52,6 +53,15 @@ Health check:
 Product listing (from the in-memory catalog):
 
 - `GET http://localhost:3000/products`
+
+Cart operations:
+
+- `POST http://localhost:3000/cart`
+  - Body: `{ "items": [{ "productId": "p1", "quantity": 2 }] }`
+  - Response: `{ "id": "<cartId>", "items": [...] }`
+- `POST http://localhost:3000/cart`
+  - Body: `{ "cartId": "<cartId>", "items": [{ "productId": "p2", "quantity": 1 }] }` (adds/merges items)
+- `GET http://localhost:3000/cart/<cartId>` – fetch current cart contents
 
 ### Build and run compiled code
 
