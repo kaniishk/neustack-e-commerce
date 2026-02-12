@@ -1,0 +1,68 @@
+## Decision: Node.js + TypeScript + Express
+
+**Context:** I needed to pick a backend stack that is easy to develop and test quickly for this exercise.
+
+**Options Considered:**
+- Option A: Node.js with TypeScript and Express
+- Option B: Python (FastAPI) or another non-JS stack
+
+**Choice:** Node.js with TypeScript and Express.
+
+**Why:** This aligns with the recommended stack in the brief, has great tooling (ts-node, Jest, ts-jest), and keeps the language consistent with typical frontend stacks. Express is lightweight and well-known, which keeps focus on the business logic rather than framework complexity.
+
+---
+
+## Decision: In-memory product catalog
+
+**Context:** The assignment allows in-memory storage and I needed a way to represent products for cart and checkout.
+
+**Options Considered:**
+- Option A: In-memory array of products defined in code
+- Option B: Pluggable repository abstraction with a fake in-memory implementation
+
+**Choice:** A simple in-memory array of products defined in code.
+
+**Why:** A plain array keeps the early implementation straightforward while still being easy to refactor behind a repository interface later if needed. It matches the assignment guidance of not requiring a real database for this exercise.
+
+---
+
+## Decision: Represent prices in cents (integers)
+
+**Context:** I needed to store product prices in a way that is safe for arithmetic during checkout and discounts.
+
+**Options Considered:**
+- Option A: Store prices as `number` in major units (e.g. 19.99)
+- Option B: Store prices as integer cents (e.g. 1999)
+
+**Choice:** Store prices as integer cents in the `priceCents` field.
+
+**Why:** Using integer minor units avoids floating point rounding issues when summing line items and applying percentage discounts. It is a common practice in payment systems and keeps calculations deterministic and testable.
+
+---
+
+## Decision: Seed a fixed set of demo products
+
+**Context:** I needed some concrete products to exercise cart and checkout behavior and to have something to return from the `/products` endpoint.
+
+**Options Considered:**
+- Option A: Seed a small, fixed set of products in code
+- Option B: Allow arbitrary product creation via an API before using the cart
+
+**Choice:** Seed a small, fixed set of products directly in the in-memory store.
+
+**Why:** A fixed seed lets the API be usable immediately without extra setup. It keeps the focus on cart, checkout, and discounts rather than building product-management endpoints that are out of scope for this assignment.
+
+---
+
+## Decision: TypeScript configuration targeting CommonJS
+
+**Context:** TypeScript needed to be configured so the project can compile cleanly and run under Node.
+
+**Options Considered:**
+- Option A: Use `module: "nodenext"` with ESM-style configuration
+- Option B: Use `module: "commonjs"` with `esModuleInterop` enabled
+
+**Choice:** Use `module: "commonjs"` with `esModuleInterop: true`.
+
+**Why:** This works smoothly with Jest and the existing Node toolchain, and allows idiomatic default imports for Express. It avoids the additional configuration overhead of full ESM for this small project.
+
