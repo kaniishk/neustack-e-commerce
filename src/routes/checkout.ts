@@ -17,6 +17,74 @@ interface CheckoutBody {
   discountCode?: string;
 }
 
+router.post(
+  '/preview',
+  (req: Request<unknown, unknown, CheckoutBody>, res: Response) => {
+    const { cartId, discountCode } = req.body;
+
+    if (!cartId) {
+      return res.status(400).json({ error: 'cartId is required' });
+    }
+
+    const cart = getCart(cartId);
+    if (!cart) {
+      return res.status(404).json({ error: 'Cart not found' });
+    }
+
+    if (cart.items.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
+    }
+
+    const orderItems: OrderLineItem[] = [];
+    let subtotalCents = 0;
+
+    for (const cartItem of cart.items) {
+      const product = getProductById(cartItem.productId);
+      if (!product) {
+        return res
+          .status(400)
+          .json({ error: `Unknown productId: ${cartItem.productId}` });
+      }
+
+      const lineSubtotal = product.priceCents * cartItem.quantity;
+      subtotalCents += lineSubtotal;
+
+      orderItems.push({
+        productId: cartItem.productId,
+        quantity: cartItem.quantity,
+        unitPriceCents: product.priceCents,
+      });
+    }
+
+    let discountPercent: number | undefined;
+    let discountAmountCents = 0;
+    let totalCents = subtotalCents;
+
+    if (discountCode) {
+      const codes = listDiscountCodes();
+      const validation = validateDiscountCode(discountCode, codes);
+      if (validation.error || !validation.code) {
+        return res.status(400).json({ error: validation.error });
+      }
+
+      const appliedCode = validation.code;
+      const discount = computeDiscount(subtotalCents, appliedCode.percent);
+      discountPercent = appliedCode.percent;
+      discountAmountCents = discount.discountAmountCents;
+      totalCents = discount.totalCents;
+    }
+
+    return res.json({
+      items: orderItems,
+      subtotalCents,
+      discountCode: discountCode || undefined,
+      discountPercent,
+      discountAmountCents,
+      totalCents,
+    });
+  },
+);
+
 router.post('/', (req: Request<unknown, unknown, CheckoutBody>, res: Response) => {
   const { cartId, discountCode } = req.body;
 
@@ -39,7 +107,9 @@ router.post('/', (req: Request<unknown, unknown, CheckoutBody>, res: Response) =
   for (const cartItem of cart.items) {
     const product = getProductById(cartItem.productId);
     if (!product) {
-      return res.status(400).json({ error: `Unknown productId: ${cartItem.productId}` });
+      return res
+        .status(400)
+        .json({ error: `Unknown productId: ${cartItem.productId}` });
     }
 
     const lineSubtotal = product.priceCents * cartItem.quantity;
@@ -58,15 +128,16 @@ router.post('/', (req: Request<unknown, unknown, CheckoutBody>, res: Response) =
 
   if (discountCode) {
     const codes = listDiscountCodes();
-    const { code, error } = validateDiscountCode(discountCode, codes);
-    if (error || !code) {
-      return res.status(400).json({ error });
+    const validation = validateDiscountCode(discountCode, codes);
+    if (validation.error || !validation.code) {
+      return res.status(400).json({ error: validation.error });
     }
 
-    const result = computeDiscount(subtotalCents, code.percent);
-    discountPercent = code.percent;
-    discountAmountCents = result.discountAmountCents;
-    totalCents = result.totalCents;
+    const appliedCode = validation.code;
+    const discount = computeDiscount(subtotalCents, appliedCode.percent);
+    discountPercent = appliedCode.percent;
+    discountAmountCents = discount.discountAmountCents;
+    totalCents = discount.totalCents;
   }
 
   const orderId = randomUUID();

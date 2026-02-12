@@ -13,10 +13,21 @@ router.post('/discounts/generate', (req: Request, res: Response) => {
   const orders = listOrders();
   const codes = listDiscountCodes();
 
+  const overridePercent = req.body?.percent as number | undefined;
+  if (
+    overridePercent !== undefined &&
+    (Number.isNaN(overridePercent) || overridePercent <= 0 || overridePercent > 100)
+  ) {
+    return res
+      .status(400)
+      .json({ error: 'percent must be between 1 and 100 if provided' });
+  }
+
   const { code, error } = generateDiscountCodeIfEligible(
     orders.length,
     codes,
     discountConfig,
+    overridePercent,
   );
 
   if (error || !code) {
@@ -29,6 +40,19 @@ router.post('/discounts/generate', (req: Request, res: Response) => {
     percent: code.percent,
     createdAt: code.createdAt,
   });
+});
+
+router.get('/discounts', (_req: Request, res: Response) => {
+  const codes = listDiscountCodes();
+  return res.json(
+    codes.map((c) => ({
+      code: c.code,
+      percent: c.percent,
+      used: c.used,
+      usedByOrderId: c.usedByOrderId ?? null,
+      createdAt: c.createdAt,
+    })),
+  );
 });
 
 router.get('/stats', (_req: Request, res: Response) => {
@@ -51,11 +75,13 @@ router.get('/stats', (_req: Request, res: Response) => {
   const discountCodesUsed = codes.filter((c) => c.used).length;
 
   return res.json({
+    orderCount: orders.length,
     itemsPurchased,
     revenueCents,
     discountCodesIssued,
     discountCodesUsed,
     totalDiscountsGivenCents,
+    orders,
   });
 });
 

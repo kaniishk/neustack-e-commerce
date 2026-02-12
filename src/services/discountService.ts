@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import type { DiscountCode } from '../models/discount';
 
 export interface DiscountConfig {
@@ -18,7 +17,8 @@ export function canGenerateDiscountCode(
 export function generateDiscountCodeIfEligible(
   totalOrdersCompleted: number,
   existingCodes: DiscountCode[],
-  config: DiscountConfig
+  config: DiscountConfig,
+  overridePercent?: number,
 ): { code?: DiscountCode; error?: string } {
   const codesGenerated = existingCodes.length;
 
@@ -26,14 +26,36 @@ export function generateDiscountCodeIfEligible(
     return { error: 'Not eligible to generate discount code yet' };
   }
 
+  const percent = overridePercent ?? config.xPercent;
+
   const code: DiscountCode = {
-    code: randomUUID(),
-    percent: config.xPercent,
+    code: generateFriendlyCode(existingCodes),
+    percent,
     used: false,
     createdAt: new Date(),
   };
 
   return { code };
+}
+
+function generateFriendlyCode(existingCodes: DiscountCode[]): string {
+  // Omit easily confusable characters
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ123456789';
+  const existing = new Set(existingCodes.map((c) => c.code));
+
+  // Keep it short but reasonably unique
+  // e.g. 8 characters, like "K9F7X2PQ"
+  let attempt = '';
+  do {
+    let value = '';
+    for (let i = 0; i < 8; i += 1) {
+      const index = Math.floor(Math.random() * alphabet.length);
+      value += alphabet[index];
+    }
+    attempt = value;
+  } while (existing.has(attempt));
+
+  return attempt;
 }
 
 export function validateDiscountCode(
