@@ -80,3 +80,17 @@
 
 **Why:** This keeps the API simple and easy to exercise from tools like Postman: the client only needs to remember the `cartId`. It avoids building authentication and user management, which are out of scope for this exercise, while still reflecting a realistic pattern (cart-as-session) that can later be mapped to authenticated users if needed.
 
+---
+
+## Decision: Nth-order, one-time percentage discount codes
+
+**Context:** I needed to formalize how “every nth order gets a coupon code for x% discount” should work in code and data structures.
+
+**Options Considered:**
+- Option A: Per-customer counters and flat-amount coupons (e.g. $5 off)
+- Option B: Global order counter where at most `floor(totalOrdersCompleted / n)` discount codes are generated, each code giving an x% discount once
+
+**Choice:** Global nth-order counter with one-time percentage discount codes.
+
+**Why:** A global counter with `floor(totalOrdersCompleted / n)` allowed codes is simple to reason about and aligns directly with the problem statement. Using percentage discounts keeps the logic flexible across different basket sizes, and enforcing one-time usage per code prevents abuse while remaining easy to track in-memory via a `used` flag and `usedByOrderId` reference.
+
