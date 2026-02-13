@@ -25,10 +25,11 @@ app.use('/cart', cartRouter);
 app.use('/admin', adminRouter);
 app.use('/checkout', checkoutRouter);
 
-app.listen(port, () => {
-  // Simple startup log; in a larger app we'd use a logger
-  console.log(`Server listening on port ${port}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
+}
 
 export default app;
 

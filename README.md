@@ -9,7 +9,7 @@ This project is a small e-commerce app with a **Node.js/TypeScript/Express** bac
 - **Runtime:** Node.js
 - **Language:** TypeScript
 - **Web framework:** Express
-- **Testing:** Jest + ts-jest (configured, tests to be added as core logic is implemented)
+- **Testing:** Jest + ts-jest (unit tests for discount service, integration tests for checkout API)
 
 These choices are documented in more detail in `DECISIONS.md`.
 
