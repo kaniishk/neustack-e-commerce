@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { StatsResponse } from '../../lib/api';
 import { getStats } from '../../lib/api';
-
-function centsToCurrency(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
-    style: 'currency',
-    currency: 'USD',
-  });
-}
+import { centsToCurrency } from '../../lib/format';
 
 function StatsView() {
   const [stats, setStats] = useState<StatsResponse | null>(null);

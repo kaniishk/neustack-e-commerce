@@ -13,14 +13,16 @@ router.post('/discounts/generate', (req: Request, res: Response) => {
   const orders = listOrders();
   const codes = listDiscountCodes();
 
-  const overridePercent = req.body?.percent as number | undefined;
-  if (
-    overridePercent !== undefined &&
-    (Number.isNaN(overridePercent) || overridePercent <= 0 || overridePercent > 100)
-  ) {
-    return res
-      .status(400)
-      .json({ error: 'percent must be between 1 and 100 if provided' });
+  const rawPercent = req.body?.percent as number | undefined;
+  let overridePercent: number | undefined;
+  if (rawPercent !== undefined) {
+    const p = Number(rawPercent);
+    if (Number.isNaN(p) || p < 5 || p > 75 || p % 5 !== 0) {
+      return res
+        .status(400)
+        .json({ error: 'percent must be between 5 and 75 in multiples of 5 (e.g. 5, 10, 15)' });
+    }
+    overridePercent = Math.floor(p);
   }
 
   const { code, error } = generateDiscountCodeIfEligible(

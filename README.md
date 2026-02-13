@@ -1,16 +1,6 @@
-## Neustack E-commerce (Backend)
+## Neustack E-commerce
 
-This project is a small e-commerce backend used to demonstrate cart, checkout, and a simple discount system. It is built with **Node.js**, **TypeScript**, and **Express**, using **in-memory storage** (no database).
-
-At this stage, the project includes:
-- A basic Express server with a `/health` endpoint.
-- An in-memory product catalog with a few seeded products.
-- A `/products` endpoint to list the available products.
-- An in-memory cart store keyed by `cartId`, with simple cart APIs.
-- A `/checkout` endpoint to turn a cart into an order, optionally applying a discount code.
-- Admin endpoints for generating discount codes and viewing aggregate stats.
-
-Future improvements could include persistence, authentication, and a frontend.
+This project is a small e-commerce app with a **Node.js/TypeScript/Express** backend (in-memory storage) and a **React/Vite** frontend. It demonstrates cart, checkout, and a simple discount system (nth-order discount codes).
 
 ---
 
@@ -25,28 +15,66 @@ These choices are documented in more detail in `DECISIONS.md`.
 
 ---
 
-## Getting Started
+## Steps to run the project
 
 ### Prerequisites
 
-- Node.js (LTS version recommended)
-- npm
+- **Node.js** (LTS recommended, e.g. 18+)
+- **npm**
 
-### Install dependencies
+### 1. Install dependencies
+
+From the project root:
 
 ```bash
 npm install
+cd frontend && npm install && cd ..
 ```
 
-### Run in development mode
+### 2. Run the app
 
-Starts the TypeScript server using `ts-node` with automatic reload via `nodemon`:
+**Option A – Backend and frontend together (recommended)**
+
+```bash
+npm run dev:all
+```
+
+- Backend: **http://localhost:3000**
+- Frontend: **http://localhost:5173** (open in browser)
+
+**Option B – Run separately**
+
+Terminal 1 (backend):
+
+```bash
+npm run dev:backend
+```
+
+Terminal 2 (frontend):
+
+```bash
+npm run dev:frontend
+```
+
+### 3. Optional environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3000` | Backend server port |
+| `FRONTEND_ORIGIN` | `http://localhost:5173` | Allowed CORS origin for the frontend |
+| `DISCOUNT_NTH_ORDER` | `5` | Generate one discount code every N orders |
+
+---
+
+## Backend details
+
+### Run backend only (development)
 
 ```bash
 npm run dev
 ```
 
-The server will listen on port `3000` by default.
+Same as `dev:backend`: starts the Express server with `ts-node` and nodemon on port **3000**.
 
 Health check:
 
@@ -130,8 +158,12 @@ npm start
 
 ## Scripts
 
-- `npm run dev` – Run the server in development mode with TypeScript.
-- `npm run build` – Compile TypeScript to JavaScript (`dist/`).
-- `npm start` – Run the compiled server from `dist/`.
-- `npm test` – Run Jest tests (will be populated as business logic is implemented).
+| Script | Description |
+|--------|-------------|
+| `npm run dev` / `npm run dev:backend` | Backend only: Express + ts-node + nodemon (port 3000). |
+| `npm run dev:frontend` | Frontend only: Vite dev server (port 5173). |
+| `npm run dev:all` | Backend and frontend together (concurrently). |
+| `npm run build` | Compile backend TypeScript to `dist/`. |
+| `npm start` | Run compiled backend from `dist/`. |
+| `npm test` | Run Jest tests. |
 

@@ -12,13 +12,7 @@ import {
   getProducts,
   previewCheckout,
 } from '../../lib/api';
-
-function centsToCurrency(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
-    style: 'currency',
-    currency: 'USD',
-  });
-}
+import { centsToCurrency } from '../../lib/format';
 
 function CustomerLayout() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -75,12 +69,8 @@ function CustomerLayout() {
 
   const handleChangeQuantity = (productId: string, delta: number) => {
     setQuantities((prev) => {
-      const current = prev[productId] ?? 0;
-      const next = Math.max(0, current + delta);
-      if (next === 0) {
-        const { [productId]: _removed, ...rest } = prev;
-        return rest;
-      }
+      const current = prev[productId] ?? 1;
+      const next = Math.max(1, current + delta);
       return { ...prev, [productId]: next };
     });
   };
@@ -91,6 +81,7 @@ function CustomerLayout() {
 
     setError(null);
     setPreview(null);
+    setLastOrder(null);
     try {
       const updated = await createOrUpdateCart({
         cartId: cartId ?? undefined,

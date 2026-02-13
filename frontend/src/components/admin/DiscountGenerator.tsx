@@ -59,9 +59,10 @@ function DiscountGenerator() {
           <input
             className="input"
             type="number"
-            min={1}
-            max={100}
-            placeholder="Percent (optional, e.g. 10)"
+            min={5}
+            max={75}
+            step={5}
+            placeholder="Percent 5–75, step 5 (optional)"
             value={percentInput}
             onChange={(e) => setPercentInput(e.target.value)}
           />
